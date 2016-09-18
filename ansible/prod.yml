@@ -1,0 +1,13 @@
+---
+
+- name: Configuration for Production
+  hosts: all
+  become: yes
+  vars:
+    user_name: "deploy"
+
+  roles:
+    - common
+    - python
+    - { role: gunicorn, autostart: true, enabled: true }
+    - { role: nginx, use_ssl: true, enabled: true }

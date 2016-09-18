@@ -1,0 +1,18 @@
+---
+
+- name: Configuration for local development on Vagrant VM
+  hosts: all
+  become: yes
+  vars:
+    user_name: "vagrant"
+
+  roles:
+    - common
+    - python
+    - { role: gunicorn, autostart: false, enabled: false }
+    - { role: nginx, use_ssl: false, enabled: false }
+
+  tasks:
+    - name: Allow virtualenv python to bind port 80
+      command: setcap cap_net_bind_service=ep {{ home_path }}/venv/bin/python
+      changed_when: false

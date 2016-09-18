@@ -1,0 +1,4 @@
+---
+
+# server name for nginx
+host_name: "unsdgbot.climatechangebot.com"
