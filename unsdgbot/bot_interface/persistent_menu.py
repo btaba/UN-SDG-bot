@@ -41,8 +41,8 @@ def create_persistent_menu():
             },
             {
                 "type": "postback",
-                "title": "Trending News",
-                "payload": "TRENDING_POSTBACK"
+                "title": "Latest News",
+                "payload": "LATEST_POSTBACK"
             },
             {
                 "type": "postback",

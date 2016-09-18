@@ -13,6 +13,7 @@ import bot_response_text
 # from textblob import TextBlob
 
 from SDGs import goals
+from sdg_suggester import SDGSuggester
 from bot_interface.bot_interface import ButtonType, SenderActions
 
 
@@ -50,51 +51,6 @@ class Parser(object):
     def __init__(self, bot, nyt):
         self.BOT = bot
         self.NYT_API = nyt
-        self.emojis = pickle.load(open("message_processor/unicode_emoji.pickle", "rb"))
-
-
-    def extract_keywords(self, message_text):
-        """
-            params:
-                message_text: str or unicode
-
-            returns:
-                returns: str or None, if no keywords extracted we return None
-
-            1. Strip conjunctions
-            2. Only accept queries with length <= 5 excluding CC
-            3. Only accept POS tags in POS_to_accepts
-
-            To do:
-                - test with emojis, REMOVE emojis
-                - add emoji dictionary
-
-        """
-
-        keywords = []
-        POS_to_accept = ['VBG', 'NN', 'NNP', 'NNS', 'JJ', 'CC', 'DT']
-        num_words_thresh = 5
-
-        # Remove emojis)
-        message_text = [word for word in message_text.split() if word not in self.emojis.keys()]
-        message_text = ' '.join(message_text)
-
-        parsed = TextBlob(message_text).tags
-        for p in parsed:
-            if p[1] in POS_to_accept:
-                if p[1] != 'CC':
-                    # if any POS tags are in POS_to_accept and not a CC, then append it to the keywords
-                    keywords.append(p[0])
-            else:
-                # if any POS tags are not in POS_to_accept, then don't return any keywords
-                return None
-            if len(keywords) >= num_words_thresh:
-                return None
-
-        if len(keywords) > 0:
-            return ' '.join(keywords)
-
-        return None
 
     def send_trending_articles(self, recipient_id):
         #call return_trending_list function for intent = latest
@@ -126,12 +82,13 @@ class Parser(object):
                 nyt["abstract"] = nyt["title"]
 
             share_button = self.BOT.create_button(button_type=ButtonType.SHARE.value)
-
+            read_button = self.BOT.create_button(button_type=ButtonType.WEBURL.value,
+                title="Read", url=str(nyt["web_url"]))
             template_elements.append(
                 self.BOT.create_generic_template_element(
                     element_title=nyt["title"], element_item_url=nyt["web_url"],
                     element_image_url=nyt_image_url, element_subtitle=nyt["abstract"],
-                    element_buttons=[share_button]
+                    element_buttons=[read_button, share_button]
                 )
             )
 
@@ -139,9 +96,7 @@ class Parser(object):
 
     def send_cannot_compute_helper_callback(self, recipient_id):
 
-        max_int = len(bot_response_text.help_button_title) - 1
-        idx = random.randint(0, max_int)
-        response = self.BOT.send_text_message(recipient_id, bot_response_text.help_button_title[idx])
+        response = self.BOT.send_text_message(recipient_id, bot_response_text.help_text)
 
         return response
 
@@ -232,6 +187,7 @@ class MessageProcessor(object):
     def __init__(self, bot, parser, config):
         self.BOT = bot
         self.CONFIG = config
+        self.SDGSuggester = SDGSuggester()
         self.PARSER = parser
         self.cache_message_ids = []
 
@@ -273,12 +229,14 @@ class MessageProcessor(object):
                         response = self.quick_reply_parser(recipient_id, message.quick_reply_payload)
                     elif message.message_text:
                         self.BOT.send_sender_action(recipient_id, SenderActions.TYPING_ON.value)
-                        #call witprocessor here
-                        # wit_parsed_message = self.API_PARSER.wit_api_call(message.message_text)
-                        # response = self.EXTERNAL_API_PARSER.take_external_action(
-                        #     message.message_text, recipient_id,
-                        #     self.CONFIG['NYT_NUM_ARTICLES_RETURNED']
-                        # )
+
+                        response_array = self.SDGSuggester.process_message(message.message_text)
+                        if len(response_array) > 0:
+                            for ra in response_array:
+                                response = self.BOT.send_text_message(recipient_id, ra)
+                        else:
+                            response = self.BOT.send_text_message(recipient_id, bot_response_text.help_text)
+
                         self.BOT.send_sender_action(recipient_id, SenderActions.TYPING_OFF.value)
 
                     elif message.message_attachments:
@@ -311,7 +269,7 @@ class MessageProcessor(object):
             response = self.PARSER.send_welcome_message(recipient_id)
         elif postback_payload == "SDG_POSTBACK":
             response = self.PARSER.send_sdg_explanation(recipient_id)
-        elif postback_payload == "TRENDING_POSTBACK":
+        elif postback_payload == "LATEST_POSTBACK":
             response = self.PARSER.send_trending_articles(recipient_id)
 
         return response
@@ -333,7 +291,6 @@ class MessageProcessor(object):
             recipient_id,
             u'\U0001F44D'
         )
-
         return response
 
     def get_rand_int(self, max_int):

@@ -3,8 +3,8 @@ from nltk.stem import WordNetLemmatizer
 
 class SDGSuggester(object):
     def __init__(self, max_length=3):
-        self.keyword_sentence_dict = pickle.load(open("Suggestions/keyword_sentence_dict.p", "rb"))
-        self.sentence_keyword_dict = pickle.load(open("Suggestions/sentence_keyword_dict.p", "rb"))
+        self.keyword_sentence_dict = pickle.load(open("message_processor/Suggestions/keyword_sentence_dict.p", "rb"))
+        self.sentence_keyword_dict = pickle.load(open("message_processor/Suggestions/sentence_keyword_dict.p", "rb"))
         self.wnl = WordNetLemmatizer()
         self.MAX_LENGTH = max_length
 

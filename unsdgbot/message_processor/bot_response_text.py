@@ -19,37 +19,20 @@ def get_sdg_quick_replies(sequence_number=1):
     ]
     return sdg_quick_replies
 
-# help_button_title = [
-#     (
-#         u"Sorry I'm too busy worrying about climate change \U0001f30e, "
-#         u"I missed what you were saying. If you need help worrying about"
-#         u" climate change too, type 'help'."
-#     ),
-#     (
-#         u"Sorry didn't catch that! \U0001f601 Type 'help', or search for something like"
-#         u" 'crabs' or 'polar bears'!"
-#     ),
-#     (
-#         u"Sorry didn't get that! \U0001f616 Type 'help', or search for something like"
-#         u" 'sea levels' or 'melting glaciers'!"
-#     )
-# ]
+help_text = u"I didn't find any suggestions in my database. Please check out the SDGs in the Menu. \U0001f30e"
 
+help_postback_text = [
+    (
+        u"I can help inform you about the UN Sustainable Development Goals (SDGs)."
+        u" Check out my Menu for Latest articles on sustainability or to read more about the SDGs.\n"
+    ),
+    (
+        u"You can also type keywords or sentences about activities you do, and I'll help suggest simple ways "
+        u"you can contribute to the SDGs!"
+    )
+]
 
-# help_postback_text = [
-#     (
-#         u"I'm still learning, but what I can do now is: \n \u2022 Search for an article "
-#         u"when you type something like 'show me articles about fish'. I can also search on keywords "
-#         u"like if you type 'ice caps' \n"
-#     ),
-#     (
-#         u"\u2022 Have a simple conversation with you; for example ask me: 'what is my name?' \n"
-#         u"\u2022 I can give you the latest scoop on climate change, just type 'trending' or 'latest' \n"
-#         u"That's all folks! \U0001f389"
-#     )
-# ]
-
-sdg_intro = "SDGs are the Sustainable Development Goals set by the United Nations. Click to learn more!"
+sdg_intro = "SDGs are the Sustainable Development Goals set by the United Nations. Click around to learn more!"
 
 
 welcome_message = [
