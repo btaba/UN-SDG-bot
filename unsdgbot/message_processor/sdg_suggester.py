@@ -1,15 +1,21 @@
 import pickle
 from nltk.stem import WordNetLemmatizer
+import string
 
 class SDGSuggester(object):
     def __init__(self, max_length=3):
         self.keyword_sentence_dict = pickle.load(open("message_processor/Suggestions/keyword_sentence_dict.p", "rb"))
         self.sentence_keyword_dict = pickle.load(open("message_processor/Suggestions/sentence_keyword_dict.p", "rb"))
         self.wnl = WordNetLemmatizer()
+        self.punct = " ".join(string.punctuation).split(" ")
         self.MAX_LENGTH = max_length
 
 
     def process_message(self, message_text):
+        message_text = message_text.lower()
+        for p in self.punct:
+            if p in message_text:
+                message_text = message_text.replace(p, "")
         parsed = message_text.split(" ")
         sent = []
         for word in parsed:
