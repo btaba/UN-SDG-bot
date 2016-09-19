@@ -1,0 +1,21 @@
+## The following requirements were added by pip freeze:
+click==6.6
+cloudpickle==0.2.1
+cymem==1.31.2
+enum==0.4.6
+enum34==1.1.6
+Flask==0.11.1
+itsdangerous==0.24
+Jinja2==2.8
+MarkupSafe==0.23
+murmurhash==0.26.4
+nltk==3.2.1
+numpy==1.11.1
+nytimesarticle==0.1.0
+preshed==0.46.4
+requests==2.11.1
+semver==2.6.0
+six==1.10.0
+sputnik==0.9.3
+thinc==5.0.8
+Werkzeug==0.11.11

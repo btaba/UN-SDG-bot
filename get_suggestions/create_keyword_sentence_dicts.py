@@ -62,7 +62,7 @@ def get_np(sent):
         elif noun_phrase.orth_ not in np:
             without_stop = ' '.join([word.orth_.lower() for word in noun_phrase if word.orth_ not in stopwords.words('english') + punct])
             np.append(noun_phrase.orth_.lower())
-            if without_stop not in np:
+            if n not in np:
                 np.append(without_stop)
             for token in noun_phrase:
                 if token.pos_ in POS_TO_INCLUDE:
@@ -72,6 +72,20 @@ def get_np(sent):
     all_keywords.update(np)
     return np
 
+def get_np_v2(sent):
+    parsed = parser(sent)
+    np = []
+    STOP_POS= ["PRON"]
+    POS_TO_INCLUDE = ["VERB", "NOUN", "PROPN"]
+    for word in parsed:
+        # for w in word:
+        if word.pos_ not in STOP_POS and word.pos_ in POS_TO_INCLUDE and\
+                word.orth_ not in stopwords.words('english') + punct:
+            np.append(word.orth_.lower())
+            np.append(word.lemma_)
+    np = list(set(np))
+
+    return np
 
 def cosine_sim(v1,v2):
     return dot(v1, v2) / (norm(v1) * norm(v2))
@@ -103,7 +117,8 @@ def create_sentence_object(l, sent):
     sent_object["level_name"] = levels[l]
     sent_object["sentence"] = sent.text
     sent_object["links"] = find_links(sent)
-    sent_object["keywords"] = get_np(sent.text)
+    # sent_object["keywords"] = get_np(sent.text)
+    sent_object["keywords"] = get_np_v2(sent.text)
     return sent_object
 
 
@@ -125,13 +140,12 @@ def create_inverse_dict(sentence_keyword_dict):
 if __name__ == '__main__':
     all_keywords = set()
     sentence_keyword_dict = {}
-    level_bullets, levels = get_suggestions()    
+    level_bullets, levels = get_suggestions()
     running_count = 0
     for l in level_bullets:
         for sent in level_bullets[l]:
             sentence_keyword_dict[running_count] = create_sentence_object(l, sent)
             running_count += 1
     keyword_sentence_dict = create_inverse_dict(sentence_keyword_dict)
-    pickle.dump(keyword_sentence_dict, open("keyword_sentence_dict.p", "wb"))
-    pickle.dump(sentence_keyword_dict, open("sentence_keyword_dict.p", "wb"))
-    
+    pickle.dump(keyword_sentence_dict, open("keyword_sentence_dict_v2.p", "wb"))
+    pickle.dump(sentence_keyword_dict, open("sentence_keyword_dict_v2.p", "wb"))
