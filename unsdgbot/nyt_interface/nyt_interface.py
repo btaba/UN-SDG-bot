@@ -19,13 +19,6 @@ class NytimesApi(object):
         self.num_days_trending = 3
 
     def return_all(self, query):
-        """
-            Keep query as is if climate change is in the query
-            If not, add climate change
-        """
-
-        if 'climate change' in query:
-            return self.api.search(q=query)
         return self.api.search(q=self.secret_keyword + query)
 
     def return_trending(self):

@@ -9,6 +9,7 @@ import spacy
 parser = spacy.load('en')
 from nltk.corpus import stopwords
 
+import itertools
 import string
 string.punctuation
 punct = " ".join(string.punctuation).split(" ")
@@ -91,13 +92,14 @@ def cosine_sim(v1,v2):
     return dot(v1, v2) / (norm(v1) * norm(v2))
 
 
-def find_related_keywords(keywords, all_words):
+def find_related_keywords(keywords):
     related = []
     for word in keywords:
+        all_words = list([w for w in parser.vocab if w.has_vector and w.orth_.islower() and w.lower_ not in keywords])
         if len(word.split(" ")) == 1:
             parsed_word = parser.vocab[word]
-            all_words.sort(key=lambda w: cosine_sim(w.vector, parser(word).vector), reverse = True)
-            for word in all_words[:10]:
+            all_words.sort(key=lambda w: cosine_sim(w.vector, parser(word).vector), reverse=True)
+            for word in all_words[:5]:
                 #get top 10 similar words
                 if word not in keywords:
                     related.append(word.orth_)
@@ -138,7 +140,6 @@ def create_inverse_dict(sentence_keyword_dict):
 
 
 if __name__ == '__main__':
-    all_keywords = set()
     sentence_keyword_dict = {}
     level_bullets, levels = get_suggestions()
     running_count = 0
@@ -146,6 +147,16 @@ if __name__ == '__main__':
         for sent in level_bullets[l]:
             sentence_keyword_dict[running_count] = create_sentence_object(l, sent)
             running_count += 1
+
+    all_keywords = [sentence_keyword_dict[s]['keywords'] for s in sentence_keyword_dict]
+    all_keywords = list(itertools.chain.from_iterable(all_keywords))
+    all_keywords = set(all_keywords)
+
+    for s in sentence_keyword_dict:
+        related = find_related_keywords(sentence_keyword_dict[s]['keywords'])
+        sentence_keyword_dict[s]['keywords'].append(related)
+
     keyword_sentence_dict = create_inverse_dict(sentence_keyword_dict)
+
     pickle.dump(keyword_sentence_dict, open("keyword_sentence_dict_v2.p", "wb"))
     pickle.dump(sentence_keyword_dict, open("sentence_keyword_dict_v2.p", "wb"))
