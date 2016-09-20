@@ -81,6 +81,7 @@ def get_np_v2(sent):
     for word in parsed:
         # for w in word:
         if word.pos_ not in STOP_POS and word.pos_ in POS_TO_INCLUDE and\
+                word.prob <= -7.001 and\
                 word.orth_ not in stopwords.words('english') + punct:
             np.append(word.orth_.lower())
             np.append(word.lemma_)
@@ -97,7 +98,7 @@ def find_related_keywords(keywords):
     for word in keywords:
         all_words = list([w for w in parser.vocab if w.has_vector and w.orth_.islower() and w.lower_ not in keywords])
         if len(word.split(" ")) == 1:
-            parsed_word = parser.vocab[word]
+            # parsed_word = parser.vocab[word]
             all_words.sort(key=lambda w: cosine_sim(w.vector, parser(word).vector), reverse=True)
             for word in all_words[:5]:
                 #get top 10 similar words
@@ -148,13 +149,13 @@ if __name__ == '__main__':
             sentence_keyword_dict[running_count] = create_sentence_object(l, sent)
             running_count += 1
 
-    all_keywords = [sentence_keyword_dict[s]['keywords'] for s in sentence_keyword_dict]
-    all_keywords = list(itertools.chain.from_iterable(all_keywords))
-    all_keywords = set(all_keywords)
+    # all_keywords = [sentence_keyword_dict[s]['keywords'] for s in sentence_keyword_dict]
+    # all_keywords = list(itertools.chain.from_iterable(all_keywords))
+    # all_keywords = set(all_keywords)
 
     for s in sentence_keyword_dict:
         related = find_related_keywords(sentence_keyword_dict[s]['keywords'])
-        sentence_keyword_dict[s]['keywords'].append(related)
+        sentence_keyword_dict[s]['keywords'].extend(related)
 
     keyword_sentence_dict = create_inverse_dict(sentence_keyword_dict)
 
